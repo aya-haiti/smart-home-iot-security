@@ -1,0 +1,72 @@
+# =====================================================================
+# Docker Compose v2 - Smart Home IoT Security
+# =====================================================================
+# Deux brokers MQTT en parallele :
+#   - VULNERABLE   port 1883 : aucune securite (demo des risques)
+#   - SECURISE TLS port 8883 : TLS + auth + ACL + anti-DoS
+# Plus Node-RED sur le port 1880.
+#
+# Pre-requis : avoir lance scripts/generate-passwords.* ET
+#              scripts/generate-certs.*
+# =====================================================================
+
+services:
+
+  # -------------------------------------------------------------------
+  # BROKER VULNERABLE (port 1883)
+  # -------------------------------------------------------------------
+  mosquitto-vulnerable:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt-vulnerable
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/vulnerable/config:/mosquitto/config
+      - ./mosquitto/vulnerable/data:/mosquitto/data
+      - ./mosquitto/vulnerable/log:/mosquitto/log
+    networks:
+      - iot-net
+
+  # -------------------------------------------------------------------
+  # BROKER SECURISE TLS (port 8883)
+  # -------------------------------------------------------------------
+  mosquitto-secure:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt-secure
+    restart: unless-stopped
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./mosquitto/secure/config:/mosquitto/config
+      - ./mosquitto/secure/certs:/mosquitto/certs:ro
+      - ./mosquitto/secure/data:/mosquitto/data
+      - ./mosquitto/secure/log:/mosquitto/log
+    networks:
+      - iot-net
+
+  # -------------------------------------------------------------------
+  # NODE-RED (port 1880)
+  # -------------------------------------------------------------------
+  node-red:
+    image: nodered/node-red:latest
+    container_name: node-red
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./node-red/data:/data
+      # On monte la CA en lecture seule pour permettre les connexions
+      # TLS sortantes vers le broker securise
+      - ./mosquitto/secure/certs/ca.crt:/data/ca.crt:ro
+    environment:
+      - TZ=Europe/Paris
+    networks:
+      - iot-net
+    depends_on:
+      - mosquitto-vulnerable
+      - mosquitto-secure
+
+networks:
+  iot-net:
+    driver: bridge

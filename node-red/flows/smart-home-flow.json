@@ -1,0 +1,738 @@
+[
+  {
+    "id": "b44bb2a0f6ea802f",
+    "type": "tab",
+    "label": "Smart Home v2",
+    "disabled": false,
+    "info": "Smart Home IoT Security v2 - avec detection d'anomalies"
+  },
+  {
+    "id": "edfc4aa53435091b",
+    "type": "mqtt-broker",
+    "name": "Broker (vuln/secure)",
+    "broker": "host.docker.internal",
+    "port": "1883",
+    "clientid": "node-red-dashboard",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": "4",
+    "keepalive": "60",
+    "cleansession": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "8e349b3ae92b9f93",
+    "type": "ui_base",
+    "theme": {
+      "name": "theme-dark",
+      "lightTheme": {},
+      "darkTheme": {},
+      "customTheme": {},
+      "themeState": {}
+    },
+    "site": {
+      "name": "Smart Home v2",
+      "hideToolbar": "false",
+      "allowSwipe": "false",
+      "lockMenu": "false",
+      "allowTempTheme": "true",
+      "dateFormat": "DD/MM/YYYY",
+      "sizes": {
+        "sx": 48,
+        "sy": 48,
+        "gx": 6,
+        "gy": 6,
+        "cx": 6,
+        "cy": 6,
+        "px": 0,
+        "py": 0
+      }
+    }
+  },
+  {
+    "id": "0a4b3437d289bda2",
+    "type": "ui_tab",
+    "name": "Maison",
+    "icon": "home",
+    "order": 1,
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "abbc942833049609",
+    "type": "ui_group",
+    "name": "Capteurs",
+    "tab": "0a4b3437d289bda2",
+    "order": 1,
+    "disp": true,
+    "width": "6",
+    "collapse": false
+  },
+  {
+    "id": "5196c743cef0447f",
+    "type": "ui_group",
+    "name": "Actionneurs",
+    "tab": "0a4b3437d289bda2",
+    "order": 2,
+    "disp": true,
+    "width": "6",
+    "collapse": false
+  },
+  {
+    "id": "2347cdbebfa19b91",
+    "type": "ui_group",
+    "name": "Alertes",
+    "tab": "0a4b3437d289bda2",
+    "order": 3,
+    "disp": true,
+    "width": "6",
+    "collapse": false
+  },
+  {
+    "id": "153dc857084267b5",
+    "type": "ui_group",
+    "name": "Detection d'anomalies (v2)",
+    "tab": "0a4b3437d289bda2",
+    "order": 4,
+    "disp": true,
+    "width": "6",
+    "collapse": false
+  },
+  {
+    "id": "afa5bcf291755c73",
+    "type": "mqtt in",
+    "name": "temp/state",
+    "topic": "home/+/temperature/state",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "edfc4aa53435091b",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 130,
+    "y": 80,
+    "wires": [
+      [
+        "b4c455ee8cbf97e2",
+        "980ee094ae1b40c1"
+      ]
+    ]
+  },
+  {
+    "id": "b4c455ee8cbf97e2",
+    "type": "function",
+    "name": "parse temp",
+    "func": "let p = msg.payload;\nif (typeof p === 'string') p = JSON.parse(p);\nmsg.payload = p.value;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 80,
+    "wires": [
+      [
+        "270b668bda4ddfe2"
+      ]
+    ]
+  },
+  {
+    "id": "270b668bda4ddfe2",
+    "type": "ui_gauge",
+    "name": "Temperature salon",
+    "group": "abbc942833049609",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "gtype": "gage",
+    "title": "Temperature",
+    "label": "C",
+    "format": "{{value}}",
+    "min": 10,
+    "max": 35,
+    "colors": [
+      "#00b500",
+      "#e6e600",
+      "#ca3838"
+    ],
+    "seg1": "20",
+    "seg2": "26",
+    "diff": false,
+    "className": "",
+    "x": 530,
+    "y": 80,
+    "wires": []
+  },
+  {
+    "id": "f11c731bd26f4bbd",
+    "type": "mqtt in",
+    "name": "gas/state",
+    "topic": "home/+/gas/state",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "edfc4aa53435091b",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 130,
+    "y": 160,
+    "wires": [
+      [
+        "4027a7be3b80a1d6",
+        "980ee094ae1b40c1"
+      ]
+    ]
+  },
+  {
+    "id": "4027a7be3b80a1d6",
+    "type": "function",
+    "name": "parse gas",
+    "func": "let p = msg.payload;\nif (typeof p === 'string') p = JSON.parse(p);\nmsg.payload = p.value;\nmsg.status = p.status;\nreturn [msg, {payload: p.status}];",
+    "outputs": 2,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 160,
+    "wires": [
+      [
+        "80d2e19e4b959288"
+      ],
+      [
+        "5aefa07c68963a2c"
+      ]
+    ]
+  },
+  {
+    "id": "80d2e19e4b959288",
+    "type": "ui_gauge",
+    "name": "Niveau gaz",
+    "group": "abbc942833049609",
+    "order": 2,
+    "width": 0,
+    "height": 0,
+    "gtype": "gage",
+    "title": "Gaz cuisine",
+    "label": "ppm",
+    "format": "{{value}}",
+    "min": 0,
+    "max": 800,
+    "colors": [
+      "#00b500",
+      "#e6e600",
+      "#ca3838"
+    ],
+    "seg1": "200",
+    "seg2": "400",
+    "diff": false,
+    "className": "",
+    "x": 530,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "5aefa07c68963a2c",
+    "type": "ui_text",
+    "name": "Statut gaz",
+    "group": "2347cdbebfa19b91",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "label": "Statut gaz",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "x": 530,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "cc9cd964d3765dc5",
+    "type": "mqtt in",
+    "name": "door/state",
+    "topic": "home/+/door/state",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "edfc4aa53435091b",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 130,
+    "y": 240,
+    "wires": [
+      [
+        "738c2601fd48310a",
+        "980ee094ae1b40c1"
+      ]
+    ]
+  },
+  {
+    "id": "738c2601fd48310a",
+    "type": "function",
+    "name": "parse door",
+    "func": "let p = msg.payload;\nif (typeof p === 'string') p = JSON.parse(p);\nmsg.payload = p.state;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 240,
+    "wires": [
+      [
+        "cfb94a53e66f73a8"
+      ]
+    ]
+  },
+  {
+    "id": "cfb94a53e66f73a8",
+    "type": "ui_text",
+    "name": "Porte entree",
+    "group": "abbc942833049609",
+    "order": 3,
+    "width": 0,
+    "height": 0,
+    "label": "Porte entree",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "x": 530,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "b7587a78eb639166",
+    "type": "mqtt in",
+    "name": "light/state",
+    "topic": "home/+/light/state",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "edfc4aa53435091b",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 130,
+    "y": 320,
+    "wires": [
+      [
+        "8fcbc07e0bd6aad3"
+      ]
+    ]
+  },
+  {
+    "id": "8fcbc07e0bd6aad3",
+    "type": "function",
+    "name": "parse light",
+    "func": "let p = msg.payload;\nif (typeof p === 'string') p = JSON.parse(p);\nmsg.payload = p.state + ' (' + p.intensity + '%)';\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 320,
+    "wires": [
+      [
+        "6e74128776dadc53"
+      ]
+    ]
+  },
+  {
+    "id": "6e74128776dadc53",
+    "type": "ui_text",
+    "name": "Etat lampe",
+    "group": "5196c743cef0447f",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "label": "Lampe salon",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "x": 530,
+    "y": 320,
+    "wires": []
+  },
+  {
+    "id": "dbbdc873957c0c60",
+    "type": "ui_button",
+    "name": "Lampe ON",
+    "group": "5196c743cef0447f",
+    "order": 2,
+    "width": 0,
+    "height": 0,
+    "passthru": false,
+    "label": "Lampe ON",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "#00b500",
+    "className": "",
+    "icon": "",
+    "payload": "{\"action\":\"ON\"}",
+    "payloadType": "json",
+    "topic": "home/salon/light/cmd",
+    "topicType": "str",
+    "x": 130,
+    "y": 380,
+    "wires": [
+      [
+        "21f16672ad0836af"
+      ]
+    ]
+  },
+  {
+    "id": "20891178e24a8f8a",
+    "type": "ui_button",
+    "name": "Lampe OFF",
+    "group": "5196c743cef0447f",
+    "order": 3,
+    "width": 0,
+    "height": 0,
+    "passthru": false,
+    "label": "Lampe OFF",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "#ca3838",
+    "className": "",
+    "icon": "",
+    "payload": "{\"action\":\"OFF\"}",
+    "payloadType": "json",
+    "topic": "home/salon/light/cmd",
+    "topicType": "str",
+    "x": 130,
+    "y": 420,
+    "wires": [
+      [
+        "21f16672ad0836af"
+      ]
+    ]
+  },
+  {
+    "id": "d8069959d0d82d58",
+    "type": "ui_slider",
+    "name": "Intensite",
+    "label": "Intensite",
+    "tooltip": "",
+    "group": "5196c743cef0447f",
+    "order": 4,
+    "width": 0,
+    "height": 0,
+    "passthru": true,
+    "outs": "end",
+    "topic": "home/salon/light/cmd",
+    "topicType": "str",
+    "min": 0,
+    "max": 100,
+    "step": 5,
+    "className": "",
+    "x": 130,
+    "y": 460,
+    "wires": [
+      [
+        "46870107110d37ca"
+      ]
+    ]
+  },
+  {
+    "id": "46870107110d37ca",
+    "type": "function",
+    "name": "to JSON",
+    "func": "msg.payload = { intensity: msg.payload };\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 460,
+    "wires": [
+      [
+        "21f16672ad0836af"
+      ]
+    ]
+  },
+  {
+    "id": "21f16672ad0836af",
+    "type": "mqtt out",
+    "name": "light/cmd",
+    "topic": "",
+    "qos": "0",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "edfc4aa53435091b",
+    "x": 530,
+    "y": 420,
+    "wires": []
+  },
+  {
+    "id": "29eecdb8c11dd1d4",
+    "type": "mqtt in",
+    "name": "ac/state",
+    "topic": "home/+/ac/state",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "edfc4aa53435091b",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 130,
+    "y": 520,
+    "wires": [
+      [
+        "b5b1c3f731c41a6e"
+      ]
+    ]
+  },
+  {
+    "id": "b5b1c3f731c41a6e",
+    "type": "function",
+    "name": "parse ac",
+    "func": "let p = msg.payload;\nif (typeof p === 'string') p = JSON.parse(p);\nmsg.payload = p.state + ' / ' + p.mode + ' / ' + p.target_temp + 'C';\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 520,
+    "wires": [
+      [
+        "0878c0f2532cc2d8"
+      ]
+    ]
+  },
+  {
+    "id": "0878c0f2532cc2d8",
+    "type": "ui_text",
+    "name": "Etat clim",
+    "group": "5196c743cef0447f",
+    "order": 5,
+    "width": 0,
+    "height": 0,
+    "label": "Climatisation chambre",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "x": 530,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "7c272766b562d60c",
+    "type": "ui_button",
+    "name": "Clim ON",
+    "group": "5196c743cef0447f",
+    "order": 6,
+    "width": 0,
+    "height": 0,
+    "passthru": false,
+    "label": "Clim ON",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "#00b500",
+    "className": "",
+    "icon": "",
+    "payload": "{\"action\":\"ON\",\"mode\":\"COOL\"}",
+    "payloadType": "json",
+    "topic": "home/chambre/ac/cmd",
+    "topicType": "str",
+    "x": 130,
+    "y": 580,
+    "wires": [
+      [
+        "2b3a5cb87d3f4b16"
+      ]
+    ]
+  },
+  {
+    "id": "3afc32fe7b545351",
+    "type": "ui_button",
+    "name": "Clim OFF",
+    "group": "5196c743cef0447f",
+    "order": 7,
+    "width": 0,
+    "height": 0,
+    "passthru": false,
+    "label": "Clim OFF",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "#ca3838",
+    "className": "",
+    "icon": "",
+    "payload": "{\"action\":\"OFF\"}",
+    "payloadType": "json",
+    "topic": "home/chambre/ac/cmd",
+    "topicType": "str",
+    "x": 130,
+    "y": 620,
+    "wires": [
+      [
+        "2b3a5cb87d3f4b16"
+      ]
+    ]
+  },
+  {
+    "id": "a3b990399a69ae08",
+    "type": "ui_slider",
+    "name": "Temp cible",
+    "label": "Temp cible",
+    "tooltip": "",
+    "group": "5196c743cef0447f",
+    "order": 8,
+    "width": 0,
+    "height": 0,
+    "passthru": true,
+    "outs": "end",
+    "topic": "home/chambre/ac/cmd",
+    "topicType": "str",
+    "min": 16,
+    "max": 30,
+    "step": 1,
+    "className": "",
+    "x": 130,
+    "y": 660,
+    "wires": [
+      [
+        "9bf1329c0761f726"
+      ]
+    ]
+  },
+  {
+    "id": "9bf1329c0761f726",
+    "type": "function",
+    "name": "to JSON",
+    "func": "msg.payload = { target_temp: msg.payload };\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 660,
+    "wires": [
+      [
+        "2b3a5cb87d3f4b16"
+      ]
+    ]
+  },
+  {
+    "id": "2b3a5cb87d3f4b16",
+    "type": "mqtt out",
+    "name": "ac/cmd",
+    "topic": "",
+    "qos": "0",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "edfc4aa53435091b",
+    "x": 530,
+    "y": 620,
+    "wires": []
+  },
+  {
+    "id": "980ee094ae1b40c1",
+    "type": "function",
+    "name": "Anti-flood detector",
+    "func": "// Maintient un compteur glissant par topic et alerte en cas de flood\n// Seuil : plus de 30 messages dans les 60 dernieres secondes\nconst SEUIL = 30;\nconst FENETRE_MS = 60000;\n\nlet history = context.get('history') || {};\nconst topic = msg.topic;\nconst now = Date.now();\n\nif (!history[topic]) history[topic] = [];\nhistory[topic].push(now);\n// Nettoyer les vieux timestamps\nhistory[topic] = history[topic].filter(t => now - t < FENETRE_MS);\n\nconst count = history[topic].length;\ncontext.set('history', history);\n\n// Sortie 1 : alerte (uniquement si seuil depasse)\nlet alertMsg = null;\nif (count > SEUIL) {\n    alertMsg = {\n        payload: `ANOMALIE : ${count} msg/min sur ${topic}`,\n        topic: topic\n    };\n}\n\n// Sortie 2 : graphique (rate par topic)\nconst chartMsg = {\n    payload: count,\n    topic: topic\n};\n\nreturn [alertMsg, chartMsg];\n",
+    "outputs": 2,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 740,
+    "wires": [
+      [
+        "97ab1e95374f21b9"
+      ],
+      [
+        "73a46a13cac3a4a0"
+      ]
+    ]
+  },
+  {
+    "id": "97ab1e95374f21b9",
+    "type": "ui_text",
+    "name": "Alerte anomalie",
+    "group": "153dc857084267b5",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "label": "Derniere alerte",
+    "format": "{{msg.payload}}",
+    "layout": "col-center",
+    "className": "",
+    "x": 540,
+    "y": 720,
+    "wires": []
+  },
+  {
+    "id": "73a46a13cac3a4a0",
+    "type": "ui_chart",
+    "name": "Taux msg/min",
+    "group": "153dc857084267b5",
+    "order": 2,
+    "width": 0,
+    "height": 0,
+    "label": "Messages/min par topic",
+    "chartType": "line",
+    "legend": "true",
+    "xformat": "HH:mm:ss",
+    "interpolate": "linear",
+    "nodata": "(en attente)",
+    "dot": false,
+    "ymin": "",
+    "ymax": "",
+    "removeOlder": "5",
+    "removeOlderPoints": "100",
+    "removeOlderUnit": "60",
+    "cutout": 0,
+    "useOneColor": false,
+    "useUTC": false,
+    "colors": [
+      "#1f77b4",
+      "#aec7e8",
+      "#ff7f0e",
+      "#2ca02c",
+      "#98df8a",
+      "#d62728",
+      "#ff9896",
+      "#9467bd",
+      "#c5b0d5"
+    ],
+    "outputs": 1,
+    "useDifferentColor": false,
+    "className": "",
+    "x": 540,
+    "y": 760,
+    "wires": [
+      []
+    ]
+  }
+]

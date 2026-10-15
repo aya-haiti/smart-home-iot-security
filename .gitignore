@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Mosquitto - donnees runtime
+mosquitto/*/data/*.db
+mosquitto/*/log/*.log
+mosquitto/*/data/mosquitto.db
+!mosquitto/*/data/.gitkeep
+!mosquitto/*/log/.gitkeep
+
+# SECRETS - ne JAMAIS commiter
+mosquitto/secure/config/passwords
+mosquitto/secure/certs/*.key
+mosquitto/secure/certs/*.crt
+mosquitto/secure/certs/*.csr
+mosquitto/secure/certs/*.srl
+mosquitto/secure/certs/*.ext
+CREDENTIALS.txt
+
+# Node-RED
+node-red/data/node_modules/
+node-red/data/.npm/
+node-red/data/.config.users.json*
+node-red/data/.config.runtime.json*
+node-red/data/.config.nodes.json*
+node-red/data/.flows*.backup
+node-red/data/flows_cred.json
+node-red/data/package-lock.json
+
+# Editeurs
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

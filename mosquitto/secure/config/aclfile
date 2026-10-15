@@ -1,0 +1,48 @@
+# =====================================================================
+# Fichier ACL (Access Control List) - Mosquitto sécurisé
+# =====================================================================
+# Definit qui peut LIRE et ECRIRE sur quels topics.
+# Architecture des topics :
+#   home/<piece>/<capteur>/state    -> publie par les capteurs (lecture seule)
+#   home/<piece>/<actionneur>/cmd   -> commande envoyee aux actionneurs
+#   home/<piece>/<actionneur>/state -> etat publie par les actionneurs
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# Utilisateur : sensor_user
+# Role : capteurs (temperature, gaz, porte) - publient leurs mesures
+# Droits : ECRITURE seule sur les topics state des capteurs
+# ---------------------------------------------------------------------
+user sensor_user
+topic write home/+/temperature/state
+topic write home/+/gas/state
+topic write home/+/door/state
+
+# ---------------------------------------------------------------------
+# Utilisateur : actuator_user
+# Role : actionneurs (lampe, climatisation) - executent des commandes
+# Droits : LECTURE des commandes, ECRITURE de leur etat
+# ---------------------------------------------------------------------
+user actuator_user
+topic read home/+/light/cmd
+topic write home/+/light/state
+topic read home/+/ac/cmd
+topic write home/+/ac/state
+
+# ---------------------------------------------------------------------
+# Utilisateur : dashboard_user (Node-RED)
+# Role : interface utilisateur, supervision et controle
+# Droits : LECTURE de tous les etats, ECRITURE des commandes uniquement
+# ---------------------------------------------------------------------
+user dashboard_user
+topic read home/+/+/state
+topic write home/+/light/cmd
+topic write home/+/ac/cmd
+
+# ---------------------------------------------------------------------
+# Utilisateur : admin_user
+# Role : administrateur (depannage, supervision globale)
+# Droits : LECTURE complete de l'arborescence home/#
+# ---------------------------------------------------------------------
+user admin_user
+topic readwrite home/#
