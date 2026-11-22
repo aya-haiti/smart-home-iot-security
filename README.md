@@ -1,5 +1,10 @@
 # Smart Home IoT Security v2 — Demonstration MQTT
 
+> **Démo en ligne (simulation sûre dans le navigateur) :** le dossier [`web-demo/`](web-demo/) rejoue
+> les scénarios (espionnage, injection, falsification, flood, broker sécurisé) sans exposer aucun broker.
+> La stack Docker ci-dessous contient un broker **volontairement vulnérable** : à exécuter uniquement en local
+> ou sur un réseau isolé, jamais exposé sur Internet.
+
 > Projet pedagogique de cybersecurite IoT : simulation d'une maison
 > connectee, mise en evidence des risques d'un broker MQTT non protege,
 > et application de contre-mesures (TLS + authentification + ACL +

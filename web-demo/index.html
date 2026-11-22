@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Home IoT · Security Lab</title>
+<meta name="description" content="Simulation pédagogique dans le navigateur : broker MQTT vulnérable vs sécurisé (TLS, authentification, ACL), espionnage, injection de commandes, flood et détection d'anomalies.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">🏠 Smart Home <span>IoT Security Lab</span></div>
+    <a class="gh" href="https://github.com/aya-haiti/smart-home-iot-security" target="_blank" rel="noopener">Code source ↗</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <h1>Que se passe-t-il quand un broker MQTT n'est pas protégé ?</h1>
+    <p>Cette page rejoue <strong>dans votre navigateur</strong> le laboratoire du projet : 5 objets connectés, un broker Mosquitto vulnérable (port 1883, accès anonyme) et un broker durci (TLS 1.2, mots de passe, ACL, limites). Lancez les attaques, observez le tableau de bord, puis basculez vers le broker sécurisé.</p>
+    <p class="safe">🛡️ Simulation pédagogique : aucun broker réel n'est exposé, aucune connexion réseau n'est ouverte. Le comportement reproduit les fichiers <code>mosquitto.conf</code>, <code>aclfile</code>, les capteurs Python et la règle de détection Node-RED du dépôt.</p>
+  </section>
+
+  <section class="broker-switch" aria-label="Choix du broker">
+    <button class="bk active" data-mode="vulnerable"><b>Broker vulnérable</b><span>:1883 · anonyme · sans chiffrement</span></button>
+    <button class="bk" data-mode="secure"><b>Broker sécurisé</b><span>:8883 · TLS 1.2 · auth · ACL</span></button>
+    <label class="speed"><input type="checkbox" id="fast" checked> Accélérer ×5</label>
+  </section>
+
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-h"><h2>Tableau de bord (Node-RED)</h2><span class="tag" id="broker-tag">vulnérable</span></div>
+      <div class="devices">
+        <div class="dev"><div class="ico">🌡️</div><div><small>Salon · température</small><b id="d-temp">—</b></div></div>
+        <div class="dev" id="card-gas"><div class="ico">🔥</div><div><small>Cuisine · gaz</small><b id="d-gas">—</b><em id="d-gas-st"></em></div></div>
+        <div class="dev"><div class="ico">🚪</div><div><small>Entrée · porte</small><b id="d-door">—</b></div></div>
+        <div class="dev" id="card-light"><div class="ico">💡</div><div><small>Salon · lampe</small><b id="d-light">—</b></div></div>
+        <div class="dev" id="card-ac"><div class="ico">❄️</div><div><small>Chambre · climatisation</small><b id="d-ac">—</b></div></div>
+        <div class="dev"><div class="ico">📈</div><div><small>Messages / min (max topic)</small><b id="d-rate">0</b></div></div>
+      </div>
+      <canvas id="spark" height="70" aria-label="Messages par minute"></canvas>
+      <div class="alert" id="anomaly" hidden></div>
+      <div class="owner">
+        <span>Commandes légitimes (dashboard_user) :</span>
+        <button data-cmd="light-on">Lampe ON</button><button data-cmd="light-off">Lampe OFF</button>
+        <button data-cmd="ac-cool">Clim COOL 22°</button><button data-cmd="ac-off">Clim OFF</button>
+      </div>
+    </section>
+
+    <section class="panel attacker">
+      <div class="panel-h"><h2>Console de l'attaquant</h2>
+        <select id="identity" aria-label="Identité de l'attaquant">
+          <option value="anon">Anonyme, sans TLS</option>
+          <option value="anon-tls">Anonyme, avec TLS</option>
+          <option value="sensor_user">Identifiants volés : sensor_user</option>
+        </select>
+      </div>
+      <div class="attacks">
+        <button data-atk="sniff"><b>1 · Espionner</b><span>s'abonner à <code>#</code> pendant 30 s</span></button>
+        <button data-atk="inject"><b>2 · Injecter</b><span>allumer la lampe, chauffer à 30 °C</span></button>
+        <button data-atk="spoof"><b>3 · Falsifier</b><span>fausse fuite de gaz 999 ppm</span></button>
+        <button data-atk="flood"><b>4 · Flood</b><span>500 messages sur le topic gaz</span></button>
+      </div>
+      <pre class="term" id="term" aria-live="polite"></pre>
+    </section>
+  </div>
+
+  <section class="panel lessons">
+    <h2>Ce que montre chaque scénario</h2>
+    <div class="grid" id="lessons"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Configuration réellement appliquée</h2>
+    <div class="cfg">
+      <div><h3>Broker vulnérable</h3><pre>listener 1883 0.0.0.0
+allow_anonymous true</pre></div>
+      <div><h3>Broker sécurisé</h3><pre>listener 8883 0.0.0.0
+tls_version tlsv1.2
+allow_anonymous false
+password_file /mosquitto/config/passwords
+acl_file      /mosquitto/config/aclfile
+max_connections 50
+message_size_limit 8192</pre></div>
+      <div><h3>ACL (extrait)</h3><pre>user sensor_user
+topic write home/+/temperature/state
+topic write home/+/gas/state
+topic write home/+/door/state
+
+user dashboard_user
+topic read  home/+/+/state
+topic write home/+/light/cmd
+topic write home/+/ac/cmd</pre></div>
+    </div>
+    <p class="small">Le dépôt contient la stack Docker complète (Mosquitto ×2, Node-RED, simulateurs Python, scripts de génération de certificats et de mots de passe) à exécuter <strong>en local uniquement</strong>.</p>
+  </section>
+</main>
+<footer class="wrap foot">Aya Haiti · Projet de cybersécurité IoT · simulation à but éducatif</footer>
+<script src="sim.js"></script>
+</body>
+</html>

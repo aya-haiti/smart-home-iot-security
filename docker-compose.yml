@@ -49,7 +49,7 @@ services:
   # NODE-RED (port 1880)
   # -------------------------------------------------------------------
   node-red:
-    image: nodered/node-red:latest
+    image: nodered/node-red:4.0.9
     container_name: node-red
     restart: unless-stopped
     ports:
